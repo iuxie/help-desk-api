@@ -16,6 +16,7 @@ public record TicketResponseDTO(
         LocalDateTime openedAt,
         LocalDateTime updatedAt,
         LocalDateTime slaDeadline,
+        LocalDateTime resolvedAt,
         Long requesterId,
         Long technicianId,
         Long categoryId
