@@ -26,9 +26,6 @@ public class CategoryModel {
     @Column(length = 1000)
     private String description;
 
-    @Column(name = "sla_deadline_hours", nullable = false)
-    private Integer slaDeadlineHours;
-
     @Column(nullable = false)
     private Boolean active;
 

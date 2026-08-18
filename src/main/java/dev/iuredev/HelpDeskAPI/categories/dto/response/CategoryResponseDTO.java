@@ -6,7 +6,6 @@ public record CategoryResponseDTO(
         Long id,
         String name,
         String description,
-        Integer slaDeadlineHours,
         Boolean active,
         LocalDateTime createdAt
 ) {
