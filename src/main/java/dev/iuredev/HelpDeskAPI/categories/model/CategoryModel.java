@@ -1,4 +1,4 @@
-package dev.iuredev.HelpDeskAPI.category.model;
+package dev.iuredev.HelpDeskAPI.categories.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
