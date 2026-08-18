@@ -58,15 +58,15 @@ public class TicketModel {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "requester_id", nullable = false)
-    private UserModel requesterId;
+    private UserModel requester;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "technician_id")
-    private UserModel technicianId;
+    private UserModel technician;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
-    private CategoryModel categoryId;
+    private CategoryModel category;
 
     @PrePersist
     private void onCreate() {
