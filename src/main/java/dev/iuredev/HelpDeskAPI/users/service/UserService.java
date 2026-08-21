@@ -37,7 +37,7 @@ public class UserService {
     }
 
     public UserResponseDTO createUser(UserCreateRequestDTO requestDTO) {
-        if (!repository.existsByEmailIgnoreCase(requestDTO.email())) {
+        if (!repository.existsByEmailIgnoreCase(requestDTO.email().toLowerCase().trim())) {
             UserModel userModel = mapper.toEntity(requestDTO);
             userModel.setEmail(userModel.getEmail().toLowerCase().trim());
             UserModel savedModel = repository.save(userModel);
@@ -50,10 +50,10 @@ public class UserService {
         Optional<UserModel> userModel = repository.findById(id);
         if (userModel.isPresent()) {
             UserModel existingModel = userModel.get();
-            if (!repository.existsByEmailIgnoreCaseAndIdNot(requestDTO.email(), id)) {
+            if (!repository.existsByEmailIgnoreCaseAndIdNot(requestDTO.email().toLowerCase().trim(), id)) {
                 mapper.updateEntity(requestDTO, existingModel);
-                UserModel updateModel = repository.save(existingModel);
                 existingModel.setEmail(existingModel.getEmail().toLowerCase().trim());
+                UserModel updateModel = repository.save(existingModel);
                 return mapper.toDTO(updateModel);
             }
             throw new BusinessException("E-mail informado já existe no sistema");
