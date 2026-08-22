@@ -43,6 +43,7 @@ public class UserService {
         if (!repository.existsByEmailIgnoreCase(requestDTO.email().toLowerCase().trim())) {
             UserModel userModel = mapper.toEntity(requestDTO);
             userModel.setEmail(userModel.getEmail().toLowerCase().trim());
+            userModel.setPassword(passwordEncoder.encode(requestDTO.password()));
             UserModel savedModel = repository.save(userModel);
             return mapper.toDTO(savedModel);
         }
