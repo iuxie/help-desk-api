@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 public record UserCreateRequestDTO(
         @NotBlank @Size(max = 255) String name,
         @NotBlank @Email @Size(max = 255) String email,
-        @NotBlank String password,
+        @NotBlank @Size(min = 8, max = 64) String password,
         @NotNull Role role
 ) {
 }
