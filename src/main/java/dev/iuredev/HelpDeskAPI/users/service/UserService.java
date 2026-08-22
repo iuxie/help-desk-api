@@ -9,6 +9,7 @@ import dev.iuredev.HelpDeskAPI.users.dto.response.UserResponseDTO;
 import dev.iuredev.HelpDeskAPI.users.mapper.UserMapper;
 import dev.iuredev.HelpDeskAPI.users.model.UserModel;
 import dev.iuredev.HelpDeskAPI.users.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,10 +20,12 @@ public class UserService {
 
     private final UserRepository repository;
     private final UserMapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository repository, UserMapper mapper) {
+    public UserService(UserRepository repository, UserMapper mapper, PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.mapper = mapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<UserResponseDTO> findAllUsers() {
