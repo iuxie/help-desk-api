@@ -5,11 +5,13 @@ import dev.iuredev.HelpDeskAPI.users.dto.request.UserUpdateRequestDTO;
 import dev.iuredev.HelpDeskAPI.users.dto.response.UserResponseDTO;
 import dev.iuredev.HelpDeskAPI.users.model.UserModel;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
+    @Mapping(target = "password", ignore = true)
     UserModel toEntity(UserCreateRequestDTO userCreateRequestDTO);
 
     void updateEntity(
