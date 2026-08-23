@@ -11,11 +11,13 @@ import dev.iuredev.HelpDeskAPI.users.model.UserModel;
 import dev.iuredev.HelpDeskAPI.users.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository repository;
@@ -39,6 +41,7 @@ public class UserService {
         return mapper.toDTO(userModel.orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado.")));
     }
 
+    @Transactional
     public UserResponseDTO createUser(UserCreateRequestDTO requestDTO) {
         if (!repository.existsByEmailIgnoreCase(requestDTO.email().toLowerCase().trim())) {
             UserModel userModel = mapper.toEntity(requestDTO);
@@ -50,6 +53,7 @@ public class UserService {
         throw new BusinessException("E-mail informado já existe no sistema");
     }
 
+    @Transactional
     public UserResponseDTO updateUser(Long id, UserUpdateRequestDTO requestDTO) {
         Optional<UserModel> userModel = repository.findById(id);
         if (userModel.isPresent()) {
@@ -65,6 +69,7 @@ public class UserService {
         throw new ResourceNotFoundException("Usuário não encontrado.");
     }
 
+    @Transactional
     public UserResponseDTO changeUserStatus(Long id, UserChangeStatusRequestDTO requestDTO) {
         Optional<UserModel> userModel = repository.findById(id);
         if (userModel.isPresent()) {
