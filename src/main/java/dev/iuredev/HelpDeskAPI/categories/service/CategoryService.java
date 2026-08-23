@@ -1,5 +1,6 @@
 package dev.iuredev.HelpDeskAPI.categories.service;
 
+import dev.iuredev.HelpDeskAPI.categories.dto.request.CategoryChangeStatusRequestDTO;
 import dev.iuredev.HelpDeskAPI.categories.dto.request.CategoryRequestDTO;
 import dev.iuredev.HelpDeskAPI.categories.dto.response.CategoryResponseDTO;
 import dev.iuredev.HelpDeskAPI.categories.mapper.CategoryMapper;
@@ -71,6 +72,18 @@ public class CategoryService {
                 return mapper.toDTO(savedModel);
             }
             throw new BusinessException("Categoria com o nome informado já existe no sistema");
+        }
+        throw new ResourceNotFoundException("Categoria não encontrada.");
+    }
+
+    @Transactional
+    public CategoryResponseDTO changeCategoryStatus(Long id, CategoryChangeStatusRequestDTO requestDTO) {
+        Optional<CategoryModel> categoryModel = repository.findById(id);
+        if (categoryModel.isPresent()) {
+            CategoryModel existingCategory = categoryModel.get();
+            existingCategory.setActive(requestDTO.active());
+            CategoryModel savedModel = repository.save(existingCategory);
+            return mapper.toDTO(savedModel);
         }
         throw new ResourceNotFoundException("Categoria não encontrada.");
     }
