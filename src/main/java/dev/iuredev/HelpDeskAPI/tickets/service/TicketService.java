@@ -80,7 +80,7 @@ public class TicketService {
     }
 
     private LocalDateTime generateSlaDeadline(Priority priority) {
-        return LocalDateTime.now().plusDays(priority.getSlaHours());
+        return LocalDateTime.now().plusHours(priority.getSlaHours());
     }
 
 }
