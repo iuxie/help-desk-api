@@ -7,6 +7,7 @@ import dev.iuredev.HelpDeskAPI.enums.TicketStatus;
 import dev.iuredev.HelpDeskAPI.exceptions.BusinessException;
 import dev.iuredev.HelpDeskAPI.exceptions.ResourceNotFoundException;
 import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketCreateRequestDTO;
+import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketUpdateRequestDTO;
 import dev.iuredev.HelpDeskAPI.tickets.dto.response.TicketResponseDTO;
 import dev.iuredev.HelpDeskAPI.tickets.mapper.TicketMapper;
 import dev.iuredev.HelpDeskAPI.tickets.model.TicketModel;
@@ -76,6 +77,23 @@ public class TicketService {
         ticketModel.setRequester(userModel);
         ticketModel.setCategory(categoryModel);
         ticketModel.setSlaDeadline(generateSlaDeadline(ticketModel.getPriority()));
+        TicketModel savedModel = repository.save(ticketModel);
+        return mapper.toDTO(savedModel);
+    }
+
+    @Transactional
+    public TicketResponseDTO updateTicket(Long id, TicketUpdateRequestDTO requestDTO) {
+        CategoryModel categoryModel = categoryRepository.findById(requestDTO.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
+
+        if (!Boolean.TRUE.equals(categoryModel.getActive())) {
+            throw new BusinessException("Categoria inativa.");
+        }
+
+        TicketModel ticketModel = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
+
+        mapper.updateEntity(requestDTO, ticketModel);
         TicketModel savedModel = repository.save(ticketModel);
         return mapper.toDTO(savedModel);
     }
