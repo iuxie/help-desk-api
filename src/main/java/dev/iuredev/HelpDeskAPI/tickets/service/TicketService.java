@@ -134,29 +134,47 @@ public class TicketService {
         TicketModel ticketModel = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado."));
 
-        TicketStatus requestStatus = requestDTO.status();
-        TicketStatus ticketStatus = ticketModel.getStatus();
+        TicketStatus currentStatus = ticketModel.getStatus();
+        TicketStatus requestedStatus = requestDTO.status();
 
-        String statusName =  (ticketStatus.equals(TicketStatus.RESOLVIDO)) ? "RESOLVIDO" :
-                ticketStatus.equals(TicketStatus.CANCELADO) ? "CANCELADO" :
-                ticketStatus.equals(TicketStatus.EM_ATENDIMENTO) ? "EM_ATENDIMENTO" :
-                    ticketStatus.equals(TicketStatus.AGUARDANDO_SOLICITANTE) ? "AGUARDANDO_SOLICITANTE" : "ABERTO";
-
-        if (ticketStatus.equals(TicketStatus.RESOLVIDO) || ticketStatus.equals(TicketStatus.CANCELADO)) {
-            throw new BusinessException("Chamado " + statusName + " não pode ter o status alterado.");
-        }
-        if (ticketStatus.equals(TicketStatus.ABERTO)) {
-            if (requestStatus.equals(TicketStatus.RESOLVIDO)) {
-                throw new BusinessException("Chamado ABERTO não pode ser resolvido");
-            }
-        }
-        if (ticketStatus.equals(TicketStatus.EM_ATENDIMENTO) || ticketStatus.equals(TicketStatus.AGUARDANDO_SOLICITANTE)) {
-            if (requestStatus.equals(TicketStatus.ABERTO)) {
-                throw new BusinessException("Chamado EM_ATENDIMENTO não pode ser aberto novamente.");
-            }
+        if (currentStatus == TicketStatus.RESOLVIDO || currentStatus == TicketStatus.CANCELADO) {
+            throw new BusinessException(
+                    "Chamado " + currentStatus.name() + " não pode ter o status alterado."
+            );
         }
 
-        ticketModel.setStatus(requestStatus);
+        if (requestedStatus == TicketStatus.RESOLVIDO) {
+            throw new BusinessException(
+                    "Utilize a operação de resolução para definir o chamado como RESOLVIDO."
+            );
+        }
+
+        boolean validTransition = switch (currentStatus) {
+            case ABERTO -> requestedStatus == TicketStatus.CANCELADO;
+            case EM_ATENDIMENTO -> requestedStatus == TicketStatus.AGUARDANDO_SOLICITANTE
+                    || requestedStatus == TicketStatus.CANCELADO;
+            case AGUARDANDO_SOLICITANTE -> requestedStatus == TicketStatus.EM_ATENDIMENTO
+                    || requestedStatus == TicketStatus.CANCELADO;
+            case RESOLVIDO, CANCELADO -> false;
+        };
+
+        if (!validTransition) {
+            throw new BusinessException(
+                    "Transição de status inválida: " + currentStatus.name()
+                            + " para " + requestedStatus.name() + "."
+            );
+        }
+
+        if ((requestedStatus == TicketStatus.EM_ATENDIMENTO
+                || requestedStatus == TicketStatus.AGUARDANDO_SOLICITANTE)
+                && ticketModel.getTechnician() == null) {
+            throw new BusinessException(
+                    "Chamado precisa ter um técnico atribuído para assumir o status "
+                            + requestedStatus.name() + "."
+            );
+        }
+
+        ticketModel.setStatus(requestedStatus);
         TicketModel savedModel = repository.save(ticketModel);
         return mapper.toDTO(savedModel);
     }
