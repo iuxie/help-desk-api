@@ -2,6 +2,7 @@ package dev.iuredev.HelpDeskAPI.tickets.service;
 
 import dev.iuredev.HelpDeskAPI.categories.model.CategoryModel;
 import dev.iuredev.HelpDeskAPI.categories.repository.CategoryRepository;
+import dev.iuredev.HelpDeskAPI.enums.Priority;
 import dev.iuredev.HelpDeskAPI.enums.TicketStatus;
 import dev.iuredev.HelpDeskAPI.exceptions.ResourceNotFoundException;
 import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketCreateRequestDTO;
@@ -14,6 +15,7 @@ import dev.iuredev.HelpDeskAPI.users.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -55,23 +57,30 @@ public class TicketService {
     public TicketResponseDTO createTicket(TicketCreateRequestDTO requestDTO) {
         Optional<UserModel> userModel = userRepository.findById(requestDTO.requesterId());
         Optional<CategoryModel> categoryModel = categoryRepository.findById(requestDTO.categoryId());
-        if (userModel.isPresent()) {
-            if (categoryModel.isPresent()) {
+        if (userModel.isPresent() && userModel.get().getActive() == true) {
+            if (categoryModel.isPresent() && categoryModel.get().getActive() == true) {
                 TicketModel ticketModel = mapper.toEntity(requestDTO);
                 ticketModel.setCode(generateCode());
                 ticketModel.setStatus(TicketStatus.ABERTO);
+                ticketModel.setRequester(userModel.get());
+                ticketModel.setCategory(categoryModel.get());
+                ticketModel.setSlaDeadline(generateSlaDeadline(ticketModel.getPriority()));
                 TicketModel savedModel = repository.save(ticketModel);
                 return mapper.toDTO(savedModel);
             }
-            throw new ResourceNotFoundException("Categoria não encontrada.");
+            throw new ResourceNotFoundException("Categoria não encontrada ou inativa.");
         }
-        throw new ResourceNotFoundException("Usuário não encontrado.");
+        throw new ResourceNotFoundException("Usuário não encontrado ou inativo.");
     }
 
     private String generateCode() {
         return "TKT-" + UUID.randomUUID()
                 .toString()
                 .toUpperCase(Locale.ROOT);
+    }
+
+    private LocalDateTime generateSlaDeadline(Priority priority) {
+        return LocalDateTime.now().plusDays(priority.getSlaHours());
     }
 
 }
