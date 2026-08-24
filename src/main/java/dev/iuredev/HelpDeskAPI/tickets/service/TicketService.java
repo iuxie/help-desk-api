@@ -56,28 +56,28 @@ public class TicketService {
 
     @Transactional
     public TicketResponseDTO createTicket(TicketCreateRequestDTO requestDTO) {
-        Optional<UserModel> userModel = userRepository.findById(requestDTO.requesterId());
-        Optional<CategoryModel> categoryModel = categoryRepository.findById(requestDTO.categoryId());
-        if (userModel.isPresent()) {
-            if (Boolean.TRUE.equals(userModel.get().getActive())) {
-                if (categoryModel.isPresent()) {
-                    if (Boolean.TRUE.equals(categoryModel.get().getActive())) {
-                        TicketModel ticketModel = mapper.toEntity(requestDTO);
-                        ticketModel.setCode(generateCode());
-                        ticketModel.setStatus(TicketStatus.ABERTO);
-                        ticketModel.setRequester(userModel.get());
-                        ticketModel.setCategory(categoryModel.get());
-                        ticketModel.setSlaDeadline(generateSlaDeadline(ticketModel.getPriority()));
-                        TicketModel savedModel = repository.save(ticketModel);
-                        return mapper.toDTO(savedModel);
-                    }
-                    throw new BusinessException("Categoria inativa.");
-                }
-                throw new ResourceNotFoundException("Categoria não encontrada.");
-            }
+        UserModel userModel = userRepository.findById(requestDTO.requesterId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
+
+        if (!Boolean.TRUE.equals(userModel.getActive())) {
             throw new BusinessException("Usuário inativo.");
         }
-        throw new ResourceNotFoundException("Usuário não encontrado.");
+
+        CategoryModel categoryModel = categoryRepository.findById(requestDTO.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
+
+        if (!Boolean.TRUE.equals(categoryModel.getActive())) {
+            throw new BusinessException("Categoria inativa.");
+        }
+
+        TicketModel ticketModel = mapper.toEntity(requestDTO);
+        ticketModel.setCode(generateCode());
+        ticketModel.setStatus(TicketStatus.ABERTO);
+        ticketModel.setRequester(userModel);
+        ticketModel.setCategory(categoryModel);
+        ticketModel.setSlaDeadline(generateSlaDeadline(ticketModel.getPriority()));
+        TicketModel savedModel = repository.save(ticketModel);
+        return mapper.toDTO(savedModel);
     }
 
     private String generateCode() {
