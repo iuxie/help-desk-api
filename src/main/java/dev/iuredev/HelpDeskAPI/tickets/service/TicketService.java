@@ -6,7 +6,9 @@ import dev.iuredev.HelpDeskAPI.enums.Priority;
 import dev.iuredev.HelpDeskAPI.enums.TicketStatus;
 import dev.iuredev.HelpDeskAPI.exceptions.BusinessException;
 import dev.iuredev.HelpDeskAPI.exceptions.ResourceNotFoundException;
+import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketAssignmentRequestDTO;
 import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketCreateRequestDTO;
+import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketResolveRequestDTO;
 import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketUpdateRequestDTO;
 import dev.iuredev.HelpDeskAPI.tickets.dto.response.TicketResponseDTO;
 import dev.iuredev.HelpDeskAPI.tickets.mapper.TicketMapper;
@@ -77,6 +79,26 @@ public class TicketService {
         mapper.updateEntity(requestDTO, ticketModel);
         ticketModel.setCategory(categoryModel);
         ticketModel.setSlaDeadline(ticketModel.getOpenedAt().plusHours(ticketModel.getPriority().getSlaHours()));
+        TicketModel savedModel = repository.save(ticketModel);
+        return mapper.toDTO(savedModel);
+    }
+
+    @Transactional
+    public TicketResponseDTO assignTechnician(Long id, TicketAssignmentRequestDTO requestDTO) {
+        TicketModel ticketModel = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado."));
+        UserModel userModel = findActiveUser(requestDTO.technicianId());
+        ticketModel.setTechnician(userModel);
+        TicketModel savedModel = repository.save(ticketModel);
+        return mapper.toDTO(savedModel);
+    }
+
+    @Transactional
+    public TicketResponseDTO resolveTicket(Long id, TicketResolveRequestDTO requestDTO) {
+        TicketModel ticketModel = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado."));
+        ticketModel.setSolution(requestDTO.solution());
+        ticketModel.setStatus(TicketStatus.RESOLVIDO);
         TicketModel savedModel = repository.save(ticketModel);
         return mapper.toDTO(savedModel);
     }
