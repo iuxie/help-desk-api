@@ -4,6 +4,7 @@ import dev.iuredev.HelpDeskAPI.categories.model.CategoryModel;
 import dev.iuredev.HelpDeskAPI.categories.repository.CategoryRepository;
 import dev.iuredev.HelpDeskAPI.enums.Priority;
 import dev.iuredev.HelpDeskAPI.enums.TicketStatus;
+import dev.iuredev.HelpDeskAPI.exceptions.BusinessException;
 import dev.iuredev.HelpDeskAPI.exceptions.ResourceNotFoundException;
 import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketCreateRequestDTO;
 import dev.iuredev.HelpDeskAPI.tickets.dto.response.TicketResponseDTO;
@@ -57,20 +58,26 @@ public class TicketService {
     public TicketResponseDTO createTicket(TicketCreateRequestDTO requestDTO) {
         Optional<UserModel> userModel = userRepository.findById(requestDTO.requesterId());
         Optional<CategoryModel> categoryModel = categoryRepository.findById(requestDTO.categoryId());
-        if (userModel.isPresent() && userModel.get().getActive() == true) {
-            if (categoryModel.isPresent() && categoryModel.get().getActive() == true) {
-                TicketModel ticketModel = mapper.toEntity(requestDTO);
-                ticketModel.setCode(generateCode());
-                ticketModel.setStatus(TicketStatus.ABERTO);
-                ticketModel.setRequester(userModel.get());
-                ticketModel.setCategory(categoryModel.get());
-                ticketModel.setSlaDeadline(generateSlaDeadline(ticketModel.getPriority()));
-                TicketModel savedModel = repository.save(ticketModel);
-                return mapper.toDTO(savedModel);
+        if (userModel.isPresent()) {
+            if (Boolean.TRUE.equals(userModel.get().getActive())) {
+                if (categoryModel.isPresent()) {
+                    if (Boolean.TRUE.equals(categoryModel.get().getActive())) {
+                        TicketModel ticketModel = mapper.toEntity(requestDTO);
+                        ticketModel.setCode(generateCode());
+                        ticketModel.setStatus(TicketStatus.ABERTO);
+                        ticketModel.setRequester(userModel.get());
+                        ticketModel.setCategory(categoryModel.get());
+                        ticketModel.setSlaDeadline(generateSlaDeadline(ticketModel.getPriority()));
+                        TicketModel savedModel = repository.save(ticketModel);
+                        return mapper.toDTO(savedModel);
+                    }
+                    throw new BusinessException("Categoria inativa.");
+                }
+                throw new ResourceNotFoundException("Categoria não encontrada.");
             }
-            throw new ResourceNotFoundException("Categoria não encontrada ou inativa.");
+            throw new BusinessException("Usuário inativo.");
         }
-        throw new ResourceNotFoundException("Usuário não encontrado ou inativo.");
+        throw new ResourceNotFoundException("Usuário não encontrado.");
     }
 
     private String generateCode() {
