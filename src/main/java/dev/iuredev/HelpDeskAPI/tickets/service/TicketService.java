@@ -7,10 +7,7 @@ import dev.iuredev.HelpDeskAPI.enums.Role;
 import dev.iuredev.HelpDeskAPI.enums.TicketStatus;
 import dev.iuredev.HelpDeskAPI.exceptions.BusinessException;
 import dev.iuredev.HelpDeskAPI.exceptions.ResourceNotFoundException;
-import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketAssignmentRequestDTO;
-import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketCreateRequestDTO;
-import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketResolveRequestDTO;
-import dev.iuredev.HelpDeskAPI.tickets.dto.request.TicketUpdateRequestDTO;
+import dev.iuredev.HelpDeskAPI.tickets.dto.request.*;
 import dev.iuredev.HelpDeskAPI.tickets.dto.response.TicketResponseDTO;
 import dev.iuredev.HelpDeskAPI.tickets.mapper.TicketMapper;
 import dev.iuredev.HelpDeskAPI.tickets.model.TicketModel;
@@ -128,6 +125,38 @@ public class TicketService {
         ticketModel.setSolution(requestDTO.solution());
         ticketModel.setStatus(TicketStatus.RESOLVIDO);
         ticketModel.setResolvedAt(LocalDateTime.now());
+        TicketModel savedModel = repository.save(ticketModel);
+        return mapper.toDTO(savedModel);
+    }
+
+    @Transactional
+    public TicketResponseDTO changeTicketStatus(Long id, TicketStatusUpdateRequestDTO requestDTO) {
+        TicketModel ticketModel = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado."));
+
+        TicketStatus requestStatus = requestDTO.status();
+        TicketStatus ticketStatus = ticketModel.getStatus();
+
+        String statusName =  (ticketStatus.equals(TicketStatus.RESOLVIDO)) ? "RESOLVIDO" :
+                ticketStatus.equals(TicketStatus.CANCELADO) ? "CANCELADO" :
+                ticketStatus.equals(TicketStatus.EM_ATENDIMENTO) ? "EM_ATENDIMENTO" :
+                    ticketStatus.equals(TicketStatus.AGUARDANDO_SOLICITANTE) ? "AGUARDANDO_SOLICITANTE" : "ABERTO";
+
+        if (ticketStatus.equals(TicketStatus.RESOLVIDO) || ticketStatus.equals(TicketStatus.CANCELADO)) {
+            throw new BusinessException("Chamado " + statusName + " não pode ter o status alterado.");
+        }
+        if (ticketStatus.equals(TicketStatus.ABERTO)) {
+            if (requestStatus.equals(TicketStatus.RESOLVIDO)) {
+                throw new BusinessException("Chamado ABERTO não pode ser resolvido");
+            }
+        }
+        if (ticketStatus.equals(TicketStatus.EM_ATENDIMENTO) || ticketStatus.equals(TicketStatus.AGUARDANDO_SOLICITANTE)) {
+            if (requestStatus.equals(TicketStatus.ABERTO)) {
+                throw new BusinessException("Chamado EM_ATENDIMENTO não pode ser aberto novamente.");
+            }
+        }
+
+        ticketModel.setStatus(requestStatus);
         TicketModel savedModel = repository.save(ticketModel);
         return mapper.toDTO(savedModel);
     }
