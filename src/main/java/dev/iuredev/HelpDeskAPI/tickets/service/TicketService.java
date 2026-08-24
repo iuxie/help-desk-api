@@ -57,8 +57,8 @@ public class TicketService {
 
     @Transactional
     public TicketResponseDTO createTicket(TicketCreateRequestDTO requestDTO) {
-        UserModel userModel = validateUser(requestDTO.requesterId());
-        CategoryModel categoryModel = validateCategory(requestDTO.categoryId());
+        UserModel userModel = findActiveUser(requestDTO.requesterId());
+        CategoryModel categoryModel = findActiveCategory(requestDTO.categoryId());
         TicketModel ticketModel = mapper.toEntity(requestDTO);
         ticketModel.setCode(generateCode());
         ticketModel.setStatus(TicketStatus.ABERTO);
@@ -71,11 +71,12 @@ public class TicketService {
 
     @Transactional
     public TicketResponseDTO updateTicket(Long id, TicketUpdateRequestDTO requestDTO) {
-        CategoryModel categoryModel = validateCategory(requestDTO.categoryId());
         TicketModel ticketModel = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado."));
+        CategoryModel categoryModel = findActiveCategory(requestDTO.categoryId());
         mapper.updateEntity(requestDTO, ticketModel);
         ticketModel.setCategory(categoryModel);
+        ticketModel.setSlaDeadline(ticketModel.getOpenedAt().plusHours(ticketModel.getPriority().getSlaHours()));
         TicketModel savedModel = repository.save(ticketModel);
         return mapper.toDTO(savedModel);
     }
@@ -90,7 +91,7 @@ public class TicketService {
         return LocalDateTime.now().plusHours(priority.getSlaHours());
     }
 
-    private CategoryModel validateCategory(Long id) {
+    private CategoryModel findActiveCategory(Long id) {
         CategoryModel categoryModel = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
 
@@ -101,7 +102,7 @@ public class TicketService {
         return categoryModel;
     }
 
-    private UserModel validateUser(Long id) {
+    private UserModel findActiveUser(Long id) {
         UserModel userModel = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
 
