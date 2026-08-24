@@ -57,20 +57,8 @@ public class TicketService {
 
     @Transactional
     public TicketResponseDTO createTicket(TicketCreateRequestDTO requestDTO) {
-        UserModel userModel = userRepository.findById(requestDTO.requesterId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
-
-        if (!Boolean.TRUE.equals(userModel.getActive())) {
-            throw new BusinessException("Usuário inativo.");
-        }
-
-        CategoryModel categoryModel = categoryRepository.findById(requestDTO.categoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
-
-        if (!Boolean.TRUE.equals(categoryModel.getActive())) {
-            throw new BusinessException("Categoria inativa.");
-        }
-
+        UserModel userModel = validateUser(requestDTO.requesterId());
+        CategoryModel categoryModel = validateCategory(requestDTO.categoryId());
         TicketModel ticketModel = mapper.toEntity(requestDTO);
         ticketModel.setCode(generateCode());
         ticketModel.setStatus(TicketStatus.ABERTO);
@@ -83,17 +71,11 @@ public class TicketService {
 
     @Transactional
     public TicketResponseDTO updateTicket(Long id, TicketUpdateRequestDTO requestDTO) {
-        CategoryModel categoryModel = categoryRepository.findById(requestDTO.categoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
-
-        if (!Boolean.TRUE.equals(categoryModel.getActive())) {
-            throw new BusinessException("Categoria inativa.");
-        }
-
+        CategoryModel categoryModel = validateCategory(requestDTO.categoryId());
         TicketModel ticketModel = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
-
         mapper.updateEntity(requestDTO, ticketModel);
+        ticketModel.setCategory(categoryModel);
         TicketModel savedModel = repository.save(ticketModel);
         return mapper.toDTO(savedModel);
     }
@@ -106,6 +88,28 @@ public class TicketService {
 
     private LocalDateTime generateSlaDeadline(Priority priority) {
         return LocalDateTime.now().plusHours(priority.getSlaHours());
+    }
+
+    private CategoryModel validateCategory(Long id) {
+        CategoryModel categoryModel = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
+
+        if (!Boolean.TRUE.equals(categoryModel.getActive())) {
+            throw new BusinessException("Categoria inativa.");
+        }
+
+        return categoryModel;
+    }
+
+    private UserModel validateUser(Long id) {
+        UserModel userModel = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
+
+        if (!Boolean.TRUE.equals(userModel.getActive())) {
+            throw new BusinessException("Usuário inativo.");
+        }
+
+        return userModel;
     }
 
 }
