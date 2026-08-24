@@ -3,6 +3,7 @@ package dev.iuredev.HelpDeskAPI.tickets.service;
 import dev.iuredev.HelpDeskAPI.categories.model.CategoryModel;
 import dev.iuredev.HelpDeskAPI.categories.repository.CategoryRepository;
 import dev.iuredev.HelpDeskAPI.enums.Priority;
+import dev.iuredev.HelpDeskAPI.enums.Role;
 import dev.iuredev.HelpDeskAPI.enums.TicketStatus;
 import dev.iuredev.HelpDeskAPI.exceptions.BusinessException;
 import dev.iuredev.HelpDeskAPI.exceptions.ResourceNotFoundException;
@@ -87,10 +88,23 @@ public class TicketService {
     public TicketResponseDTO assignTechnician(Long id, TicketAssignmentRequestDTO requestDTO) {
         TicketModel ticketModel = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado."));
+
+        if (ticketModel.getStatus() == TicketStatus.RESOLVIDO) {
+            throw new BusinessException("Chamado resolvido.");
+        }
+        if (ticketModel.getStatus() == TicketStatus.CANCELADO) {
+            throw new BusinessException("Chamado cancelado.");
+        }
+
         UserModel userModel = findActiveUser(requestDTO.technicianId());
-        ticketModel.setTechnician(userModel);
-        TicketModel savedModel = repository.save(ticketModel);
-        return mapper.toDTO(savedModel);
+
+        if (userModel.getRole() == Role.TECNICO) {
+            ticketModel.setTechnician(userModel);
+            ticketModel.setStatus(TicketStatus.EM_ATENDIMENTO);
+            TicketModel savedModel = repository.save(ticketModel);
+            return mapper.toDTO(savedModel);
+        }
+        throw new BusinessException("Usuário informado não é um TECNICO.");
     }
 
     @Transactional
