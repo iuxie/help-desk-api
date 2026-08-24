@@ -111,8 +111,23 @@ public class TicketService {
     public TicketResponseDTO resolveTicket(Long id, TicketResolveRequestDTO requestDTO) {
         TicketModel ticketModel = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado."));
+
+        if (ticketModel.getStatus() == TicketStatus.CANCELADO) {
+            throw new BusinessException("Chamado cancelado não pode ser resolvido.");
+        }
+        if (ticketModel.getStatus() == TicketStatus.ABERTO) {
+                throw new BusinessException("Chamado aberto não pode ser resolvido.");
+        }
+        if (ticketModel.getStatus() == TicketStatus.RESOLVIDO) {
+            throw new BusinessException("Chamado resolvido não pode ser resolvido novamente.");
+        }
+        if (ticketModel.getTechnician() == null) {
+            throw new BusinessException("Chamado sem técnico.");
+        }
+
         ticketModel.setSolution(requestDTO.solution());
         ticketModel.setStatus(TicketStatus.RESOLVIDO);
+        ticketModel.setResolvedAt(LocalDateTime.now());
         TicketModel savedModel = repository.save(ticketModel);
         return mapper.toDTO(savedModel);
     }
