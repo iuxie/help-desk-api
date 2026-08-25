@@ -48,6 +48,7 @@ public class CommentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Comentário não encontrado.")));
     }
 
+    @Transactional
     public CommentResponseDTO createComment(CommentCreateRequestDTO requestDTO) {
         TicketModel ticketModel = ticketRepository.findById(requestDTO.ticketId())
                 .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado."));
@@ -66,6 +67,10 @@ public class CommentService {
             if (currentRole.equals(Role.SOLICITANTE)) {
                 throw new BusinessException("Somente Técnicos ou Admins podem comentar internamente.");
             }
+        }
+
+        if (!userModel.getActive()) {
+            throw new BusinessException("Usuário inativo.");
         }
 
         CommentModel commentModel = mapper.toEntity(requestDTO);
