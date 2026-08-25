@@ -26,13 +26,13 @@ public class CommentService {
     }
 
     public List<CommentResponseDTO> findAllNotInternalCommentsInTicket(Long ticketId) {
-        TicketModel ticketModel = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado."));
-
-        return repository.findAllByTicketIdOrderByAsc(ticketId).stream()
-                .filter(commentModel -> commentModel.getInternal().equals(Boolean.FALSE))
-                .map(mapper::toDTO)
-                .toList();
+        if (ticketRepository.existsById(ticketId)) {
+            return repository.findAllByTicketIdOrderByAsc(ticketId).stream()
+                    .filter(commentModel -> commentModel.getInternal().equals(Boolean.FALSE))
+                    .map(mapper::toDTO)
+                    .toList();
+        }
+        throw new ResourceNotFoundException("Chamado não encontrado.");
     }
 
     public CommentResponseDTO findCommentById(Long id) {
