@@ -29,7 +29,7 @@ public class CommentService {
         TicketModel ticketModel = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado."));
 
-        return repository.findAllTicketIdOrderByAsc(ticketId).stream()
+        return repository.findAllByTicketIdOrderByAsc(ticketId).stream()
                 .filter(commentModel -> commentModel.getInternal().equals(Boolean.FALSE))
                 .map(mapper::toDTO)
                 .toList();

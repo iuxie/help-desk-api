@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<CommentModel, Long> {
 
-    List<CommentModel> findAllTicketIdOrderByAsc(Long ticketId);
+    List<CommentModel> findAllByTicketIdOrderByAsc(Long ticketId);
 
 }
