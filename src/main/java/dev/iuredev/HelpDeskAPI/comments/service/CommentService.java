@@ -35,4 +35,9 @@ public class CommentService {
                 .toList();
     }
 
+    public CommentResponseDTO findCommentById(Long id) {
+        return mapper.toDTO(repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Comentário não encontrado.")));
+    }
+
 }
