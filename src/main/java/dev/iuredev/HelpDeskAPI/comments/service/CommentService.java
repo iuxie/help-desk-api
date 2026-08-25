@@ -4,7 +4,6 @@ import dev.iuredev.HelpDeskAPI.comments.dto.response.CommentResponseDTO;
 import dev.iuredev.HelpDeskAPI.comments.mapper.CommentMapper;
 import dev.iuredev.HelpDeskAPI.comments.repository.CommentRepository;
 import dev.iuredev.HelpDeskAPI.exceptions.ResourceNotFoundException;
-import dev.iuredev.HelpDeskAPI.tickets.model.TicketModel;
 import dev.iuredev.HelpDeskAPI.tickets.repository.TicketRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +26,7 @@ public class CommentService {
 
     public List<CommentResponseDTO> findAllNotInternalCommentsInTicket(Long ticketId) {
         if (ticketRepository.existsById(ticketId)) {
-            return repository.findAllByTicketIdOrderByAsc(ticketId).stream()
-                    .filter(commentModel -> commentModel.getInternal().equals(Boolean.FALSE))
+            return repository.findAllByTicketIdAndInternalFalseOrderByCreatedAtAsc(ticketId).stream()
                     .map(mapper::toDTO)
                     .toList();
         }
