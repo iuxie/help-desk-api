@@ -28,7 +28,9 @@ public class CommentService {
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
 
-    public CommentService(CommentRepository repository, CommentMapper mapper, TicketRepository ticketRepository, UserRepository userRepository) {
+    public CommentService(CommentRepository repository, CommentMapper mapper,
+                          TicketRepository ticketRepository, UserRepository userRepository
+    ) {
         this.repository = repository;
         this.mapper = mapper;
         this.ticketRepository = ticketRepository;
@@ -82,9 +84,17 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponseDTO updateComment(Long id, CommentUpdateRequestDTO requestDTO) {
-        CommentModel commentModel = repository.findById(id)
+    public CommentResponseDTO updateComment(Long commentId, CommentUpdateRequestDTO requestDTO) {
+        CommentModel commentModel = repository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comentário não encontrado"));
+        TicketModel ticketModel = ticketRepository.findById(commentModel.getTicket().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado"));
+
+        TicketStatus currentStatus = ticketModel.getStatus();
+
+        if (currentStatus == TicketStatus.RESOLVIDO || currentStatus == TicketStatus.CANCELADO) {
+            throw new BusinessException("Chamado com status " + currentStatus + " não permite editar comentários.");
+        }
 
         mapper.updateEntity(requestDTO, commentModel);
         return mapper.toDTO(commentModel);
