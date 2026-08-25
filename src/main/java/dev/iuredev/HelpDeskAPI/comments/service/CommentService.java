@@ -1,6 +1,7 @@
 package dev.iuredev.HelpDeskAPI.comments.service;
 
 import dev.iuredev.HelpDeskAPI.comments.dto.request.CommentCreateRequestDTO;
+import dev.iuredev.HelpDeskAPI.comments.dto.request.CommentUpdateRequestDTO;
 import dev.iuredev.HelpDeskAPI.comments.dto.response.CommentResponseDTO;
 import dev.iuredev.HelpDeskAPI.comments.mapper.CommentMapper;
 import dev.iuredev.HelpDeskAPI.comments.model.CommentModel;
@@ -78,6 +79,15 @@ public class CommentService {
         commentModel.setAuthor(userModel);
         CommentModel savedModel = repository.save(commentModel);
         return mapper.toDTO(savedModel);
+    }
+
+    @Transactional
+    public CommentResponseDTO updateComment(Long id, CommentUpdateRequestDTO requestDTO) {
+        CommentModel commentModel = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Comentário não encontrado"));
+
+        mapper.updateEntity(requestDTO, commentModel);
+        return mapper.toDTO(commentModel);
     }
 
 }
