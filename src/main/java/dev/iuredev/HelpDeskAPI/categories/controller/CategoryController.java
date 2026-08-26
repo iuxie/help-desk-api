@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/categories")
+@RequestMapping("/api/categories")
 public class CategoryController {
 
     private final CategoryService service;
@@ -52,12 +52,12 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseDTO);
         } catch (BusinessException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(e.getMessage());
         }
     }
 
-    @PutMapping("/change-status/{id}")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<?> changeCategoryStatus(
             @PathVariable Long id,
             @Valid @RequestBody CategoryChangeStatusRequestDTO requestDTO) {
@@ -83,7 +83,7 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());
         } catch (BusinessException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(e.getMessage());
         }
     }
