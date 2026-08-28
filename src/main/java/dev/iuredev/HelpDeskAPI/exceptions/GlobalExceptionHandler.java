@@ -1,7 +1,11 @@
 package dev.iuredev.HelpDeskAPI.exceptions;
 
 import org.jspecify.annotations.Nullable;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -40,13 +45,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         List<Map<String, String>> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> {
-                    assert error.getDefaultMessage() != null;
-                    return Map.of(
-                            "field", error.getField(),
-                            "message", error.getDefaultMessage()
-                    );
-                })
+                .map(error -> Map.of(
+                        "field", error.getField(),
+                        "message", Objects.requireNonNullElse(
+                                error.getDefaultMessage(),
+                                "Valor inválido."
+                        )
+                ))
                 .toList();
 
         ProblemDetail problemDetail = createProblemDetail(

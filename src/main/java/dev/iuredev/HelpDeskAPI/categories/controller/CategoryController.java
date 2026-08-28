@@ -31,29 +31,29 @@ public class CategoryController {
         return ResponseEntity.ok(service.findAllActiveCategories());
     }
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<?> findCategoryById(@PathVariable Long id) {
-            return ResponseEntity.ok(service.findCategoryById(id));
+    public ResponseEntity<CategoryResponseDTO> findCategoryById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findCategoryById(id));
     }
 
     @PostMapping
     public ResponseEntity<CategoryResponseDTO> createCategory(@Valid @RequestBody CategoryRequestDTO requestDTO) {
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(service.createCategory(requestDTO));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.createCategory(requestDTO));
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<?> changeCategoryStatus(
+    public ResponseEntity<CategoryResponseDTO> changeCategoryStatus(
             @PathVariable Long id,
             @Valid @RequestBody CategoryChangeStatusRequestDTO requestDTO) {
-            return ResponseEntity.ok(service.changeCategoryStatus(id, requestDTO));
+        return ResponseEntity.ok(service.changeCategoryStatus(id, requestDTO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCategory(@PathVariable Long id,
-                                            @Valid @RequestBody CategoryRequestDTO requestDTO) {
-            return ResponseEntity.ok(service.updateCategory(id, requestDTO));
+    public ResponseEntity<CategoryResponseDTO> updateCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody CategoryRequestDTO requestDTO) {
+        return ResponseEntity.ok(service.updateCategory(id, requestDTO));
     }
 
 }

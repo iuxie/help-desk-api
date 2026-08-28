@@ -7,9 +7,20 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record UserCreateRequestDTO(
-        @NotBlank @Size(max = 255) String name,
-        @NotBlank @Email @Size(max = 255) String email,
-        @NotBlank @Size(min = 8, max = 64) String password,
-        @NotNull Role role
+        @NotBlank(message = "O nome é obrigatório.")
+        @Size(max = 255, message = "O nome deve possuir no máximo 255 caracteres.")
+        String name,
+
+        @NotBlank(message = "O e-mail é obrigatório.")
+        @Email(message = "O e-mail informado é inválido.")
+        @Size(max = 255, message = "O e-mail deve possuir no máximo 255 caracteres.")
+        String email,
+
+        @NotBlank(message = "A senha é obrigatória.")
+        @Size(min = 8, max = 64, message = "A senha deve possuir entre 8 e 64 caracteres.")
+        String password,
+
+        @NotNull(message = "O perfil do usuário é obrigatório.")
+        Role role
 ) {
 }

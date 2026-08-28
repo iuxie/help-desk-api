@@ -33,7 +33,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateRequestDTO requestDTO) {
+    public ResponseEntity<UserResponseDTO> createUser(
+            @Valid @RequestBody UserCreateRequestDTO requestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.createUser(requestDTO));
     }
@@ -48,8 +49,7 @@ public class UserController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<UserResponseDTO> changeUserStatus(
             @PathVariable Long id,
-            @Valid @RequestBody UserChangeStatusRequestDTO requestDTO
-            ) {
+            @Valid @RequestBody UserChangeStatusRequestDTO requestDTO) {
         return ResponseEntity.ok(service.changeUserStatus(id, requestDTO));
     }
 
