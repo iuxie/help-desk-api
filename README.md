@@ -119,25 +119,6 @@ No Linux ou macOS:
 cp .env.example .env
 ```
 
-Configuração padrão:
-
-```env
-DATABASE_URL=jdbc:postgresql://localhost:5432/help_desk
-DATABASE_USERNAME=helpdesk
-DATABASE_PASSWORD=helpdesk_dev
-POSTGRES_DB=help_desk
-POSTGRES_PORT=5432
-```
-
-O arquivo `.env` não é versionado. Altere a senha antes de utilizar a aplicação fora de um ambiente local.
-
-Caso a porta `5432` já esteja ocupada, altere as duas configurações relacionadas à porta, por exemplo:
-
-```env
-DATABASE_URL=jdbc:postgresql://localhost:5433/help_desk
-POSTGRES_PORT=5433
-```
-
 ## Executando o projeto
 
 Inicie o PostgreSQL:
