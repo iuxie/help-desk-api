@@ -20,6 +20,7 @@ O sistema permite cadastrar usuários e categorias, abrir chamados, atribuir té
 - Validação dos dados recebidos com Jakarta Validation.
 - Tratamento centralizado de erros com respostas no padrão `ProblemDetail`.
 - Versionamento do banco de dados com Flyway.
+- Documentação interativa com Swagger UI e OpenAPI 3.
 
 ## Regras principais
 
@@ -64,6 +65,7 @@ Entre as regras aplicadas estão:
 - MapStruct
 - Lombok
 - Spring Security Crypto
+- Springdoc OpenAPI
 - Maven
 - Docker Compose
 
@@ -177,6 +179,18 @@ Quando a inicialização for concluída, a API estará disponível em:
 ```text
 http://localhost:8080
 ```
+
+### Documentação da API
+
+Com a aplicação em execução, a documentação pode ser acessada nos seguintes endereços:
+
+| Recurso | URL |
+|---|---|
+| Swagger UI | `http://localhost:8080/swagger-ui.html` |
+| OpenAPI JSON | `http://localhost:8080/v3/api-docs` |
+| OpenAPI YAML | `http://localhost:8080/v3/api-docs.yaml` |
+
+O Swagger UI permite consultar os contratos e executar requisições diretamente pelo navegador.
 
 Para encerrar o PostgreSQL preservando os dados:
 
@@ -326,4 +340,3 @@ Este projeto foi desenvolvido para fins de estudo e portfólio. O escopo não in
 - testes automatizados;
 - paginação e filtros avançados;
 - recursos necessários para uma implantação em produção.
-
